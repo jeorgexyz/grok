@@ -56,15 +56,15 @@ class TrainingState(NamedTuple):
 
     params: hk.Params
 
-
 def _match(qs, ks):
     """Return True if regexes in qs match any window of strings in tuple ks."""
-    # compile regexes and force complete match
-    qts = tuple(map(lambda x: re.compile(x + "$"), qs))
-    for i in range(len(ks) - len(qs) + 1):
-        matches = [x.match(y) for x, y in zip(qts, ks[i:])]
-        if matches and all(matches):
+    
+    compiled_qs = tuple(re.compile(x + "$") for x in qs)
+    for window in zip(*(ks[i:] for i in range(len(ks) - len(qs) + 1))):
+        matches = [q.match(k) for q, k in zip(compiled_qs, window)]
+        if all(matches):
             return True
+
     return False
 
 
